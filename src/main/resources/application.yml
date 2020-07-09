@@ -1,0 +1,64 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: monitor
+  profiles:
+    #不要配置默认的${profile.active}，开发环境通过选择profile来maven来替换，注意build，部署环境${profile.active}通过启动脚本替换
+    active: ${profile.active}
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${eureka.ip}:8020/eureka            # 本地配置
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include:  '*'
+  metrics:
+    tags:
+      application: ${spring.application.name}
+mybatis:
+  mapper-locations: classpath*:/com/cm/monitor/dao/xml/*Dao.xml
+  type-aliases-package: com.cm.monitor.model
+  configuration:
+    map-underscore-to-camel-case: true
+---
+spring:
+  profiles: local
+  datasource:
+    druid:
+      connection-properties:
+        socketTimeout: 3000
+        connectTimeout: 1000
+        druid:
+          stat:
+            slowSqlMillis: 200
+      default-auto-commit: true
+      filter:
+        slf4j:
+          statement-log-error-enabled: false
+      filters: stat,slf4j
+      initial-size: 10
+      log-abandoned: true
+      max-active: 10
+      max-pool-prepared-statement-per-connection-size: 20
+      max-wait: 2000
+      min-evictable-idle-time-millis: 120000
+      min-idle: 10
+      pool-prepared-statements: true
+      remove-abandoned-timeout: 180
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      time-between-eviction-runs-millis: 30000
+      validation-query: SELECT 1
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://127.0.0.1:3306/beauty_clinic?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&serverTimezone=UTC
+    username: admin
+    password: admin
+  jpa:
+    show-sql: true
